@@ -2,17 +2,18 @@
   "name": "audiobuffer-to-wav",
   "version": "1.0.0",
   "description": "convert an AudioBuffer to .wav format",
-  "main": "index.js",
+  "main": "index.ts",
   "license": "MIT",
   "author": {
-    "name": "Matt DesLauriers",
-    "email": "dave.des@gmail.com",
-    "url": "https://github.com/mattdesl"
+    "name": "Clio Orgyán",
+    "url": "https://github.com/tucsok007"
   },
-  "dependencies": {},
+  "dependencies": {
+    "node-web-audio-api": "^1.0.9"
+  },
   "devDependencies": {
-    "budo": "^7.0.2",
-    "xhr": "^2.2.0"
+    "@types/node": "^25.6.0",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "test": "node test.js",
@@ -39,10 +40,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/Jam3/audiobuffer-to-wav.git"
+    "url": "git://github.com/tucsok007/wavify-audiobuffer.git"
   },
-  "homepage": "https://github.com/Jam3/audiobuffer-to-wav",
+  "homepage": "https://github.com/tucsok007/wavify-audiobuffer",
   "bugs": {
-    "url": "https://github.com/Jam3/audiobuffer-to-wav/issues"
+    "url": "https://github.com/tucsok007/wavify-audiobuffer/issues"
   }
 }
