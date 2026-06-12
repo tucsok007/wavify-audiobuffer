@@ -1,28 +1,39 @@
+import { getInterleavedChannelDataByAudioBuffer } from "./utils";
+
+enum WaveFormat {
+  WAVE_FORMAT_PCM = 0x0001,
+  WAVE_FORMAT_EXTENSIBLE = 0xfeff,
+  WAVE_FORMAT_IEEE_FLOAT = 0x0003,
+}
+
 const waveFormatTagsByBitDepth = {
-  16: 0x0001, //WAVE_FORMAT_PCM
-  24: 0xfeff, //WAVE_FORMAT_EXTENSIBLE - allows more than 2 channels & more than 16 bits per sample and GUID loudspeaker position masks
-  32: 0x0003, //WAVE_FORMAT_IEEE_FLOAT
+  16: WaveFormat.WAVE_FORMAT_PCM,
+  24: WaveFormat.WAVE_FORMAT_PCM,
+  32: WaveFormat.WAVE_FORMAT_IEEE_FLOAT,
 };
 
 interface IWavEncodeOptions {
-  bitDepth: keyof typeof waveFormatTagsByBitDepth; //opt to be more precise
+  bitDepth: keyof typeof waveFormatTagsByBitDepth;
+  forceWaveFormatExtensible?: boolean;
 }
 
 const defaultOptions: IWavEncodeOptions = {
   bitDepth: 16,
+  forceWaveFormatExtensible: false,
 };
 
 export default function wavifyBuffer(
   buffer: AudioBuffer,
   options: IWavEncodeOptions = defaultOptions,
 ) {
-  const samples = interleaveChannelData(buffer);
+  const samples = getInterleavedChannelDataByAudioBuffer(buffer);
 
-  return encodeWAV(
+  return encodeWave(
     samples,
     buffer.sampleRate,
     buffer.numberOfChannels,
     options.bitDepth,
+    options.forceWaveFormatExtensible,
   );
 }
 
@@ -32,11 +43,12 @@ function getWaveFormatTagByBitDepth(
   return waveFormatTagsByBitDepth[bitDepth];
 }
 
-function encodeWAV(
+function encodeWave(
   samples: Float32Array,
   sampleRate: number,
   numberOfChannels: number,
   bitDepth: keyof typeof waveFormatTagsByBitDepth,
+  forceWaveFormatExtensible: boolean = false,
 ) {
   const bytesPerSample = bitDepth / 8;
   const blockAlign = numberOfChannels * bytesPerSample;
@@ -55,7 +67,10 @@ function encodeWAV(
   /* format chunk length */
   view.setUint32(16, 16, true);
   /* sample format (raw) */
-  view.setUint16(20, getWaveFormatTagByBitDepth(bitDepth), true);
+  const waveFormatTag = forceWaveFormatExtensible
+    ? WaveFormat.WAVE_FORMAT_EXTENSIBLE
+    : getWaveFormatTagByBitDepth(bitDepth);
+  view.setUint16(20, waveFormatTag, true);
   /* channel count */
   view.setUint16(22, numberOfChannels, true);
   /* sample rate */
@@ -74,49 +89,22 @@ function encodeWAV(
   switch (bitDepth) {
     case 16:
       writeFloat32To16BitPCM(view, 44, samples);
+      break;
     case 24:
       writeFloat32To24BitPCM(view, 44, samples);
+      break;
     case 32:
       writeFloat32(view, 44, samples);
+      break;
   }
 
   return buffer;
 }
 
-function interleaveChannelData(audioBuffer: AudioBuffer) {
-  if (audioBuffer.length < 2) {
-    return audioBuffer.getChannelData(0);
-  }
-
-  const channelLength = audioBuffer.getChannelData(0).length;
-  const numberOfChannels = audioBuffer.numberOfChannels;
-  const result = new Float32Array(channelLength * numberOfChannels);
-
-  for (let frame = 0; frame < channelLength; frame++) {
-    for (
-      let channelIndex = 0;
-      channelIndex < numberOfChannels;
-      channelIndex++
-    ) {
-      result[frame * numberOfChannels + channelIndex] =
-        audioBuffer.getChannelData(channelIndex)[frame];
-    }
-  }
-
-  return result;
-}
-
-function setInt24(view: DataView) {
-  return function (offset: number, value: number, littleEndian: boolean) {
-    if (littleEndian) {
-      view.setUint8(offset, value & 0xff);
-      view.setUint8(offset + 1, (value >> 8) & 0xff);
-      view.setUint8(offset + 2, (value >> 16) & 0xff);
-    } else {
-      view.setUint8(offset, (value >> 16) & 0xff);
-      view.setUint8(offset + 1, (value >> 8) & 0xff);
-      view.setUint8(offset + 2, value & 0xff);
-    }
+function setUint24LittleEndian(view: DataView) {
+  return function (offset: number, value: number) {
+    view.setUint8(offset, value & ~0xffffff00);
+    view.setUint16(offset + 1, value >> 8, true);
   };
 }
 
@@ -131,11 +119,11 @@ function writeFloat32To24BitPCM(
   offset: number,
   input: Float32Array,
 ) {
-  const writeToView = setInt24(output);
+  const writeToView = setUint24LittleEndian(output);
 
   for (let index = 0; index < input.length; index++, offset += 3) {
     let s = Math.max(-1, Math.min(1, input[index]));
-    writeToView(offset, s < 0 ? s * 8388608 : s * 8388607, true);
+    writeToView(offset, s < 0 ? s * 0x800000 : s * 0x7fffff);
   }
 }
 

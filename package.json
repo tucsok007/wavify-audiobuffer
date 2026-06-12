@@ -1,23 +1,18 @@
 {
-  "name": "audiobuffer-to-wav",
+  "name": "wavify-audiobuffer",
   "version": "1.0.0",
   "description": "convert an AudioBuffer to .wav format",
-  "main": "index.ts",
+  "main": "index.js",
   "license": "MIT",
   "author": {
     "name": "Clio Orgyán",
     "url": "https://github.com/tucsok007"
   },
-  "dependencies": {
-    "node-web-audio-api": "^1.0.9"
-  },
   "devDependencies": {
-    "@types/node": "^25.6.0",
     "typescript": "^6.0.3"
   },
   "scripts": {
-    "test": "node test.js",
-    "start": "budo demo/index.js --live"
+    "rebuild": "sh cleanup.sh && sh build.sh"
   },
   "keywords": [
     "convert",
