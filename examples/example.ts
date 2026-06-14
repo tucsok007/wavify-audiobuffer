@@ -18,3 +18,4 @@ const waveData = new Uint8Array(wavifyBuffer(audioBuffer, { bitDepth: 24 }));
 const blob = new Blob([waveData], { type: "audio/wav" });
 
 pipeline(blob.stream(), createWriteStream(`./out.wav`));
+audioContext.close();

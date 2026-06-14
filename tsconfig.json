@@ -11,7 +11,7 @@
     "skipLibCheck": true,
     "declaration": true,
     "isolatedModules": true,
-    "types": ["node"]
+    "types": ["jest"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.test.ts"]
 }

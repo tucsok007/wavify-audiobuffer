@@ -23,15 +23,19 @@ const defaultOptions: IWavEncodeOptions = {
 };
 
 export default function wavifyBuffer(
-  buffer: AudioBuffer,
+  audioBuffer: AudioBuffer,
   options: IWavEncodeOptions = defaultOptions,
 ) {
-  const samples = getInterleavedChannelDataByAudioBuffer(buffer);
+  if (!audioBuffer) {
+    throw new Error("Please provide an AudioBuffer object.");
+  }
+
+  const samples = getInterleavedChannelDataByAudioBuffer(audioBuffer);
 
   return encodeWave(
     samples,
-    buffer.sampleRate,
-    buffer.numberOfChannels,
+    audioBuffer.sampleRate,
+    audioBuffer.numberOfChannels,
     options.bitDepth,
     options.forceWaveFormatExtensible,
   );

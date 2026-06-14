@@ -1,6 +1,15 @@
 export const getInterleavedChannelDataByAudioBuffer = (
   audioBuffer: AudioBuffer,
 ) => {
+  if (
+    !audioBuffer ||
+    (!!audioBuffer.numberOfChannels && audioBuffer.numberOfChannels == 0)
+  ) {
+    throw new Error(
+      "Please provide an AudioBuffer object with at least 1 channel.",
+    );
+  }
+
   const channels: Float32Array<ArrayBuffer>[] = [];
 
   for (
@@ -23,10 +32,6 @@ function interleaveChannelData(...channels: Float32Array[]) {
   const channelLength = channels[0].length;
 
   const result = new Float32Array(channelLength * numberOfChannels);
-
-  console.log(
-    `Channel length: ${channelLength}, Number of channels: ${numberOfChannels}`,
-  );
 
   for (let frame = 0; frame < channelLength; frame++) {
     for (

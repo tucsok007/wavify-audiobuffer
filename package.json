@@ -9,10 +9,14 @@
     "url": "https://github.com/tucsok007"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "node-web-audio-api": "^2.0.0",
+    "ts-jest": "^29.4.11",
     "typescript": "^6.0.3"
   },
   "scripts": {
-    "rebuild": "sh cleanup.sh && sh build.sh"
+    "rebuild": "sh cleanup.sh && sh build.sh",
+    "test": "set NODE_OPTIONS=--experimental-vm-modules && jest --coverage"
   },
   "keywords": [
     "convert",
