@@ -3,10 +3,10 @@ name: Build, Test, Publish
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   build:
@@ -48,7 +48,7 @@ jobs:
         run: sh ./build.sh
 
       - name: Create Git tag
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && success()
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && success()
         shell: sh
         run: |
           export PACKAGE_VERSION=$(grep '"version"' package.json | head -1 | grep -oP '(?<="version": ")[^"]*')
@@ -58,9 +58,9 @@ jobs:
           git push origin "v${PACKAGE_VERSION}"
 
       - name: Dry publish
-        if: github.ref != 'refs/heads/main' && success()
+        if: github.ref != 'refs/heads/master' && success()
         run: npm publish --dry-run
 
       - name: Publish to npm
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && success()
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && success()
         run: npm publish
