@@ -37,6 +37,13 @@
     "wave",
     "sound"
   ],
+  "files": [
+    "*.d.ts",
+    "*.js",
+    "LICENSE.md",
+    "README.md",
+    "package.json"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/tucsok007/wavify-audiobuffer.git"

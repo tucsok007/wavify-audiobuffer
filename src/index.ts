@@ -14,12 +14,10 @@ const waveFormatTagsByBitDepth = {
 
 interface IWavEncodeOptions {
   bitDepth: keyof typeof waveFormatTagsByBitDepth;
-  forceWaveFormatExtensible?: boolean;
 }
 
 const defaultOptions: IWavEncodeOptions = {
   bitDepth: 16,
-  forceWaveFormatExtensible: false,
 };
 
 export default function wavifyBuffer(
@@ -37,7 +35,6 @@ export default function wavifyBuffer(
     audioBuffer.sampleRate,
     audioBuffer.numberOfChannels,
     options.bitDepth,
-    options.forceWaveFormatExtensible,
   );
 }
 
@@ -52,7 +49,6 @@ function encodeWave(
   sampleRate: number,
   numberOfChannels: number,
   bitDepth: keyof typeof waveFormatTagsByBitDepth,
-  forceWaveFormatExtensible: boolean = false,
 ) {
   const bytesPerSample = bitDepth / 8;
   const blockAlign = numberOfChannels * bytesPerSample;
@@ -71,9 +67,7 @@ function encodeWave(
   /* format chunk length */
   view.setUint32(16, 16, true);
   /* sample format (raw) */
-  const waveFormatTag = forceWaveFormatExtensible
-    ? WaveFormat.WAVE_FORMAT_EXTENSIBLE
-    : getWaveFormatTagByBitDepth(bitDepth);
+  const waveFormatTag = getWaveFormatTagByBitDepth(bitDepth);
   view.setUint16(20, waveFormatTag, true);
   /* channel count */
   view.setUint16(22, numberOfChannels, true);

@@ -5,6 +5,15 @@ const config: Config = {
   testEnvironment: "node",
   verbose: true,
   coveragePathIgnorePatterns: ["tests/test-utils.ts"],
+  transform: {
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        tsconfig: "tsconfig.test.json",
+        isolatedModules: true,
+      },
+    ],
+  },
 };
 
 export default config;
