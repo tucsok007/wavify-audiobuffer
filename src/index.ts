@@ -1,5 +1,8 @@
 import { getInterleavedChannelDataByAudioBuffer } from "./utils";
 
+const PCM_RIFF_HEADER_SIZE = 36;
+const PCM_FMT_SUBCHUNK_SIZE_EXCLUDING_SUBCHUNK_HEADER = 16;
+
 enum WaveFormat {
   WAVE_FORMAT_PCM = 0x0001,
   WAVE_FORMAT_EXTENSIBLE = 0xfeff,
@@ -52,23 +55,25 @@ function encodeWave(
 ) {
   const bytesPerSample = bitDepth / 8;
   const blockAlign = numberOfChannels * bytesPerSample;
-
   const buffer = new ArrayBuffer(44 + samples.length * bytesPerSample);
   const view = new DataView(buffer);
 
   /* RIFF identifier */
   writeStringAsUint8Chunks(view, 0, "RIFF");
   /* RIFF chunk length */
-  view.setUint32(4, 36 + samples.length * bytesPerSample, true);
+  view.setUint32(
+    4,
+    PCM_RIFF_HEADER_SIZE + samples.length * bytesPerSample,
+    true,
+  );
   /* RIFF type */
   writeStringAsUint8Chunks(view, 8, "WAVE");
   /* format chunk identifier */
   writeStringAsUint8Chunks(view, 12, "fmt ");
   /* format chunk length */
-  view.setUint32(16, 16, true);
+  view.setUint32(16, PCM_FMT_SUBCHUNK_SIZE_EXCLUDING_SUBCHUNK_HEADER, true);
   /* sample format (raw) */
-  const waveFormatTag = getWaveFormatTagByBitDepth(bitDepth);
-  view.setUint16(20, waveFormatTag, true);
+  view.setUint16(20, getWaveFormatTagByBitDepth(bitDepth), true);
   /* channel count */
   view.setUint16(22, numberOfChannels, true);
   /* sample rate */
@@ -106,6 +111,16 @@ function setUint24LittleEndian(view: DataView) {
   };
 }
 
+function writeStringAsUint8Chunks(
+  view: DataView,
+  offset: number,
+  value: string,
+) {
+  for (let index = 0; index < value.length; index++) {
+    view.setUint8(offset + index, value.charCodeAt(index));
+  }
+}
+
 function writeFloat32(output: DataView, offset: number, input: Float32Array) {
   for (let index = 0; index < input.length; index++, offset += 4) {
     output.setFloat32(offset, input[index], true);
@@ -133,15 +148,5 @@ function writeFloat32To16BitPCM(
   for (let index = 0; index < input.length; index++, offset += 2) {
     let s = Math.max(-1, Math.min(1, input[index]));
     output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
-  }
-}
-
-function writeStringAsUint8Chunks(
-  view: DataView,
-  offset: number,
-  value: string,
-) {
-  for (let index = 0; index < value.length; index++) {
-    view.setUint8(offset + index, value.charCodeAt(index));
   }
 }
