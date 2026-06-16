@@ -16,7 +16,9 @@ npm i wavify-audiobuffer
 
 ## Usage:
 
-#### `arrayBuffer = wavifyBuffer(audioBuffer, {...options})`
+```typescript
+wavArrayBuffer = wavifyBuffer(audioBuffer, { ...options });
+```
 
 Encodes the [AudioBuffer](https://developer.mozilla.org/en-US/docs/Web/API/AudioBuffer) instance as WAV, returning a new array buffer. Interleaves multi-channel data, if necessary.
 
