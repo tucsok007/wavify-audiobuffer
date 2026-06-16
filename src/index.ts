@@ -23,6 +23,15 @@ const defaultOptions: IWavEncodeOptions = {
   bitDepth: 16,
 };
 
+/**Consumes an AudioBuffer object, and returns raw binary data for a WAVE file according to the params provided.
+ *
+ * @param audioBuffer - the AudioBuffer object to use for processing.
+ * @param options - An {@link IWavEncodeOptions} object.
+ * @returns An ArrayBuffer containing the processed WAVE data according to the provided params.
+ *
+ * @example
+ * const waveData = wavifyBuffer(myAudioBuffer, { bitDepth: 24 });
+ */
 export default function wavifyBuffer(
   audioBuffer: AudioBuffer,
   options: IWavEncodeOptions = defaultOptions,

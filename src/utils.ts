@@ -1,6 +1,11 @@
+/**Interleaves an AudioBuffer object's channels' data.
+ *
+ * @param audioBuffer - the AudioBuffer object to export the audio data from.
+ * @returns A Float32Array<ArrayBuffer> object containing the interleaved audio data from the buffer provided in params.
+ */
 export const getInterleavedChannelDataByAudioBuffer = (
   audioBuffer: AudioBuffer,
-) => {
+): Float32Array<ArrayBuffer> => {
   if (
     !audioBuffer ||
     (!!audioBuffer.numberOfChannels && audioBuffer.numberOfChannels == 0)
