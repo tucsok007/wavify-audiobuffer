@@ -1,6 +1,6 @@
 {
   "name": "wavify-audiobuffer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "convert an AudioBuffer to .wav format",
   "main": "index.js",
   "license": "MIT",
