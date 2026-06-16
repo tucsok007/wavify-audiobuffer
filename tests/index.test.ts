@@ -1,7 +1,7 @@
 import { AudioContext } from "node-web-audio-api";
 import wavifyBuffer from "../src";
 import * as Utils from "../src/utils";
-import { createSineWave } from "./test-utils";
+import { createSineWave, hasUint8StringAt } from "./test-utils";
 
 describe("wavifyBuffer", () => {
   it("should throw an error if the audio buffer object is not provided", () => {
@@ -37,32 +37,12 @@ describe("wavifyBuffer", () => {
       const dataView = new DataView(outputBuffer);
       audioContext.close();
 
-      expect(
-        "RIFF"
-          .split("")
-          .every(
-            (char, index) => char.charCodeAt(0) === dataView.getUint8(index),
-          ),
-      ).toBe(true);
+      expect(hasUint8StringAt(dataView, 0, "RIFF")).toBe(true);
       expect(dataView.getUint32(4, true)).toBe(
         36 + (audioBuffer.length * audioBuffer.numberOfChannels * bitDepth) / 8,
       );
-      expect(
-        "WAVE"
-          .split("")
-          .every(
-            (char, index) =>
-              char.charCodeAt(0) === dataView.getUint8(index + 8),
-          ),
-      );
-      expect(
-        "fmt "
-          .split("")
-          .every(
-            (char, index) =>
-              char.charCodeAt(0) === dataView.getUint8(index + 12),
-          ),
-      );
+      expect(hasUint8StringAt(dataView, 8, "WAVE"));
+      expect(hasUint8StringAt(dataView, 12, "fmt "));
       expect(dataView.getUint32(16, true)).toBe(16);
       expect(dataView.getUint16(20, true)).toBe(rawAudioFormat);
       expect(dataView.getUint16(22, true)).toBe(audioBuffer.numberOfChannels);
@@ -94,14 +74,7 @@ describe("wavifyBuffer", () => {
       const dataView = new DataView(outputBuffer);
       audioContext.close();
 
-      expect(
-        "data"
-          .split("")
-          .every(
-            (char, index) =>
-              char.charCodeAt(0) === dataView.getUint8(index + 36),
-          ),
-      );
+      expect(hasUint8StringAt(dataView, 36, "data"));
       expect(dataView.getUint32(40, true)).toBe(
         leftSine.length * audioBuffer.numberOfChannels * (bitDepth / 8),
       );
