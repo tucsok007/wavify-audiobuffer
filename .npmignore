@@ -1,10 +1,9 @@
-bower_components
+examples
 node_modules
+src
 *.log
+*.sh
 .DS_Store
-bundle.js
-test
-test.js
-demo/
+.gitignore
 .npmignore
 LICENSE.md

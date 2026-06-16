@@ -1,0 +1,85 @@
+name: Build, Test, Publish
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-test-publish:
+    runs-on: windows-latest
+    permissions:
+      security-events: write
+      contents: write
+      id-token: write
+    environment: ${{ github.ref == 'refs/heads/master' && 'Publish' || ''}}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Scream Virtual Audio Driver
+        shell: powershell
+        run: |
+          Start-Service audio*
+          Invoke-WebRequest https://github.com/duncanthrax/scream/releases/download/3.6/Scream3.6.zip -OutFile C:\Scream3.6.zip
+          Expand-Archive -Path C:\Scream3.6.zip -DestinationPath C:\Scream
+          $cert = (Get-AuthenticodeSignature C:\Scream\Install\driver\Scream.sys).SignerCertificate
+          $store = [System.Security.Cryptography.X509Certificates.X509Store]::new("TrustedPublisher", "LocalMachine")
+          $store.Open("ReadWrite")
+          $store.Add($cert)
+          $store.Close()
+          cd C:\Scream\Install\driver
+          C:\Scream\Install\helpers\devcon install Scream.inf *Scream
+
+      - name: Setup Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+
+      - name: Setup Git Bash
+        run: |
+          echo "C:\Program Files\Git\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: "javascript-typescript"
+          queries: security-and-quality
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build with build.sh
+        shell: sh
+        run: sh ./build.sh
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          upload: partial
+
+      - name: Create Git tag
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && success()
+        shell: sh
+        run: |
+          export PACKAGE_VERSION=$(grep '"version"' package.json | head -1 | grep -oP '(?<="version": ")[^"]*')
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag -a "v${PACKAGE_VERSION}" -m "Release v${PACKAGE_VERSION}"
+          git push origin "v${PACKAGE_VERSION}"
+
+      - name: Dry publish
+        if: github.ref != 'refs/heads/master' && success()
+        run: npm publish --dry-run
+
+      - name: Publish to npm
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && success()
+        run: npm publish

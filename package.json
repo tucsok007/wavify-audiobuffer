@@ -1,22 +1,22 @@
 {
-  "name": "audiobuffer-to-wav",
+  "name": "wavify-audiobuffer",
   "version": "1.0.0",
   "description": "convert an AudioBuffer to .wav format",
   "main": "index.js",
   "license": "MIT",
   "author": {
-    "name": "Matt DesLauriers",
-    "email": "dave.des@gmail.com",
-    "url": "https://github.com/mattdesl"
+    "name": "Clio Orgyán",
+    "url": "https://github.com/tucsok007"
   },
-  "dependencies": {},
   "devDependencies": {
-    "budo": "^7.0.2",
-    "xhr": "^2.2.0"
+    "@types/jest": "^30.0.0",
+    "node-web-audio-api": "^2.0.0",
+    "ts-jest": "^29.4.11",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "test": "node test.js",
-    "start": "budo demo/index.js --live"
+    "rebuild": "sh cleanup.sh && sh build.sh",
+    "test": "set NODE_OPTIONS=--experimental-vm-modules && jest --coverage"
   },
   "keywords": [
     "convert",
@@ -37,12 +37,19 @@
     "wave",
     "sound"
   ],
+  "files": [
+    "*.d.ts",
+    "*.js",
+    "LICENSE.md",
+    "README.md",
+    "package.json"
+  ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/Jam3/audiobuffer-to-wav.git"
+    "url": "git://github.com/tucsok007/wavify-audiobuffer.git"
   },
-  "homepage": "https://github.com/Jam3/audiobuffer-to-wav",
+  "homepage": "https://github.com/tucsok007/wavify-audiobuffer",
   "bugs": {
-    "url": "https://github.com/Jam3/audiobuffer-to-wav/issues"
+    "url": "https://github.com/tucsok007/wavify-audiobuffer/issues"
   }
 }

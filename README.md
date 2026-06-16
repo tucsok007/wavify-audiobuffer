@@ -1,56 +1,55 @@
-# audiobuffer-to-wav
+# wavify-audiobuffer
 
-[![stable](http://badges.github.io/stability-badges/dist/stable.svg)](http://github.com/badges/stability-badges)
+[![npm-tag](https://img.shields.io/badge/npm-1.0.0-green?logo=npm)](https://www.npmjs.com/package/wavify-audiobuffer) [![git-tag](https://img.shields.io/badge/github-repo-blue?logo=github)](https://github.com/tucsok007/wavify-audiobuffer)
 
-Encodes the contents of an [AudioBuffer](https://developer.mozilla.org/en-US/docs/Web/API/AudioBuffer) from the WebAudio API as WAVE. Supports 16-bit PCM and 32-bit float data.
+Encodes the contents of an [AudioBuffer](https://developer.mozilla.org/en-US/docs/Web/API/AudioBuffer) from the WebAudio API as WAVE. Supports 16-bit PCM, 24bit PCM and 32-bit float data.
 
-The code for this has been adapted from the export feature of [Recorder.js](https://github.com/mattdiamond/Recorderjs).
+This project is a fork and extension/rewrite of the [audiobuffer-to-wav](https://www.npmjs.com/audiobuffer-to-wav) npm library.
 
-PRs welcome.
+The package is designed to work in both web, Node.js, and Embedded environments, considering that the web audio api is available or polyfilled.
 
-## Install
+## Installation:
 
 ```sh
-npm install audiobuffer-to-wav --save
+npm i wavify-audiobuffer
 ```
 
-## Example
+## Usage:
 
-```js
-var toWav = require('audiobuffer-to-wav')
-var xhr = require('xhr')
-var context = new AudioContext()
-
-// request the MP3 as binary
-xhr({
-  uri: 'audio/track.mp3',
-  responseType: 'arraybuffer'
-}, function (err, body, resp) {
-  if (err) throw err
-  // decode the MP3 into an AudioBuffer
-  audioContext.decodeAudioData(resp, function (buffer) {
-    // encode AudioBuffer to WAV
-    var wav = toWav(buffer)
-    
-    // do something with the WAV ArrayBuffer ...
-  })
-})
-```
-
-See [the demo](./demo/index.js) for an example of loading MP3, decoding it, and triggering a download of the encoded WAV file.
-
-A more advanced example might be to write the file using Node and Electron or [hihat](https://www.npmjs.com/package/hihat), i.e. an easy way to convert MP3/OGG/etc to WAV.
-
-## Usage
-
-[![NPM](https://nodei.co/npm/audiobuffer-to-wav.png)](https://www.npmjs.com/package/audiobuffer-to-wav)
-
-#### `arrayBuffer = encodeWAV(audioBuffer, [opt])`
+#### `arrayBuffer = wavifyBuffer(audioBuffer, {...options})`
 
 Encodes the [AudioBuffer](https://developer.mozilla.org/en-US/docs/Web/API/AudioBuffer) instance as WAV, returning a new array buffer. Interleaves multi-channel data, if necessary.
 
-By default, exports with 16-bit PCM (format: 1). You can specify `opt.float32` instead, which will write format 3 with 32-bit float data.
+By default, the function exports with 16-bit PCM.
 
-## License
+You can optionally specify 24 or 32-bit bit depth.
 
-MIT, see [LICENSE.md](http://github.com/Jam3/audiobuffer-to-wav/blob/master/LICENSE.md) for details.
+## Example(s):
+
+```typescript
+import { wavifyBuffer } from "wavify-audiobuffer";
+
+fetch("https://www.example.audio/track.mp3")
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("Couldn't fetch the track data.");
+    } else {
+      return response.arrayBuffer();
+    }
+  })
+  .then((arrayBuffer) => {
+    audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
+      const waveData = wavifyBuffer(audioBuffer, { bitDepth: 24 });
+      //consume the waveData buffer
+    });
+  })
+  .catch((error) => {
+    //handle errors
+  });
+```
+
+See [this example](./examples/example.ts) for an example of loading an MP3, decoding it, and re-encoding it as a WAV file (in Node.js).
+
+## License:
+
+This project is licensed under the terms of MIT, please see the [LICENSE.md](./LICENSE.md) file for details.
