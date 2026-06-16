@@ -9,13 +9,10 @@ on:
       - master
 
 jobs:
-  build-test-publish:
+  build-and-test:
     runs-on: windows-latest
     permissions:
       security-events: write
-      contents: write
-      id-token: write
-    environment: Publish
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -64,7 +61,52 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
         with:
-          upload: partial
+          upload: always
+  publish:
+    runs-on: windows-latest
+    needs: [build-and-test]
+    permissions:
+      contents: write
+      id-token: write
+    environment: Publish
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Scream Virtual Audio Driver
+        shell: powershell
+        run: |
+          Start-Service audio*
+          Invoke-WebRequest https://github.com/duncanthrax/scream/releases/download/3.6/Scream3.6.zip -OutFile C:\Scream3.6.zip
+          Expand-Archive -Path C:\Scream3.6.zip -DestinationPath C:\Scream
+          $cert = (Get-AuthenticodeSignature C:\Scream\Install\driver\Scream.sys).SignerCertificate
+          $store = [System.Security.Cryptography.X509Certificates.X509Store]::new("TrustedPublisher", "LocalMachine")
+          $store.Open("ReadWrite")
+          $store.Add($cert)
+          $store.Close()
+          cd C:\Scream\Install\driver
+          C:\Scream\Install\helpers\devcon install Scream.inf *Scream
+
+      - name: Setup Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+
+      - name: Setup Git Bash
+        run: |
+          echo "C:\Program Files\Git\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build with build.sh
+        shell: sh
+        run: sh ./build.sh
 
       - name: Create Git tag
         if: github.event_name == 'push' && github.ref == 'refs/heads/master' && success()
