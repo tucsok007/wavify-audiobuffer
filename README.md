@@ -1,6 +1,6 @@
 # wavify-audiobuffer
 
-[![npm-tag](https://img.shields.io/badge/npm-1.0.0-green?logo=npm)](https://www.npmjs.com/package/wavify-audiobuffer) [![git-tag](https://img.shields.io/badge/github-repo-blue?logo=github)](https://github.com/tucsok007/wavify-audiobuffer)
+[![npm-tag](https://img.shields.io/badge/npm-1.0.1-green?logo=npm)](https://www.npmjs.com/package/wavify-audiobuffer) [![git-tag](https://img.shields.io/badge/github-repo-blue?logo=github)](https://github.com/tucsok007/wavify-audiobuffer)
 
 Encodes the contents of an [AudioBuffer](https://developer.mozilla.org/en-US/docs/Web/API/AudioBuffer) from the WebAudio API as WAVE. Supports 16-bit PCM, 24bit PCM and 32-bit float data.
 
